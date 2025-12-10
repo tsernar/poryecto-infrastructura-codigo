@@ -17,19 +17,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Determine environment and tfvars file
-        id: env_setup
         run: |
           BRANCH="${{ github.ref_name }}"
           case "$BRANCH" in
-            "dev")
+            dev)
               echo "environment=dev" >> $GITHUB_ENV
               echo "tfvars_file=env/dev.tfvars" >> $GITHUB_ENV
               ;;
-            "staging")
+            staging)
               echo "environment=staging" >> $GITHUB_ENV
               echo "tfvars_file=env/staging.tfvars" >> $GITHUB_ENV
               ;;
-            "prod")
+            prod)
               echo "environment=prod" >> $GITHUB_ENV
               echo "tfvars_file=env/prod.tfvars" >> $GITHUB_ENV
               ;;
@@ -52,5 +51,4 @@ jobs:
         run: terraform apply -auto-approve -var-file="${{ env.tfvars_file }}"
 
       - name: Show deployed environment
-        run: echo "Infraestructura desplegada en ambiente: ${{ env.environment }}"
-
+        run: echo Infraestructura desplegada en ambiente: ${{ env.environment }}
