@@ -42,10 +42,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init --reconfigure
+        run: terraform init
 
       - name: Terraform Plan
         run: terraform plan -var-file="${{ env.tfvars_file }}"
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="${{ env.tfvars_file }}"
