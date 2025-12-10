@@ -2,10 +2,7 @@ name: Terraform Deploy
 
 on:
   push:
-    branches:
-      - dev
-      - staging
-      - prod
+    branches: [ "dev", "staging", "prod" ]
 
 jobs:
   terraform:
@@ -16,8 +13,30 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Determine environment and tfvars file
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          case "$BRANCH" in
+            dev)
+              echo "environment=dev" >> $GITHUB_ENV
+              echo "tfvars_file=env/dev.tfvars" >> $GITHUB_ENV
+              ;;
+            staging)
+              echo "environment=staging" >> $GITHUB_ENV
+              echo "tfvars_file=env/staging.tfvars" >> $GITHUB_ENV
+              ;;
+            prod)
+              echo "environment=prod" >> $GITHUB_ENV
+              echo "tfvars_file=env/prod.tfvars" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Rama no soportada: $BRANCH"
+              exit 1
+              ;;
+          esac
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -26,7 +45,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -var-file="${{ env.tfvars_file }}"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var-file="${{ env.tfvars_file }}"
