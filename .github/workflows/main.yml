@@ -7,7 +7,7 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    # Determina el ambiente según la rama
+
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Determine environment and tfvars file
-        id: env
+        id: env_setup
         run: |
           BRANCH="${{ github.ref_name }}"
           case "$BRANCH" in
@@ -46,12 +46,11 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -var-file=$tfvars_file
+        run: terraform plan -var-file="${{ env.tfvars_file }}"
 
       - name: Terraform Apply
-        #  En producción (main), podrías requerir aprobación manual.
-        # Por ahora, lo hacemos automático para simplicidad.
-        run: terraform apply -auto-approve -var-file=$tfvars_file
+        run: terraform apply -auto-approve -var-file="${{ env.tfvars_file }}"
 
       - name: Show deployed environment
-        run: echo " Infraestructura desplegada en ambiente: $environment"
+        run: echo "Infraestructura desplegada en ambiente: ${{ env.environment }}"
+
