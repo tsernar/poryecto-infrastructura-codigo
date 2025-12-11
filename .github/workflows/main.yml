@@ -26,21 +26,33 @@ jobs:
       - name: Set Environment Variables
         run: |
           if [ "${GITHUB_REF_NAME}" == "dev" ]; then
-            echo "environment=dev" >> $GITHUB_ENV
-            echo "tfvars_file=env/dev.tfvars" >> $GITHUB_ENV
+            echo "WORKSPACE=dev" >> $GITHUB_ENV
+            echo "TFVARS=env/dev.tfvars" >> $GITHUB_ENV
           elif [ "${GITHUB_REF_NAME}" == "staging" ]; then
-            echo "environment=staging" >> $GITHUB_ENV
-            echo "tfvars_file=env/staging.tfvars" >> $GITHUB_ENV
+            echo "WORKSPACE=staging" >> $GITHUB_ENV
+            echo "TFVARS=env/staging.tfvars" >> $GITHUB_ENV
           elif [ "${GITHUB_REF_NAME}" == "main" ]; then
-            echo "environment=prod" >> $GITHUB_ENV
-            echo "tfvars_file=env/prod.tfvars" >> $GITHUB_ENV
+            echo "WORKSPACE=prod" >> $GITHUB_ENV
+            echo "TFVARS=env/prod.tfvars" >> $GITHUB_ENV
           fi
 
-      - name: Terraform Init (Reconfigure)
-        run: terraform init --reconfigure
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Select or Create Workspace
+        run: |
+          terraform workspace list
+          if terraform workspace list | grep -q "${WORKSPACE}"; then
+            echo "Selecting workspace ${WORKSPACE}"
+            terraform workspace select "${WORKSPACE}"
+          else
+            echo "Creating workspace ${WORKSPACE}"
+            terraform workspace new "${WORKSPACE}"
+            terraform workspace select "${WORKSPACE}"
+          fi
 
       - name: Terraform Plan
-        run: terraform plan -var-file="${{ env.tfvars_file }}"
+        run: terraform plan -var-file="${TFVARS}"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="${{ env.tfvars_file }}"
+        run: terraform apply -auto-approve -var-file="${TFVARS}"
