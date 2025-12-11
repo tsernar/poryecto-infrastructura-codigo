@@ -6,4 +6,4 @@ aquie hacesmos una explicacion detalla de como desplegar el proyecto de forma pe
 
 ## Se necesita
 
-- descargar terraform en la pagina oficial de terraform [Terraform.com]([https://github.com/matiassingers/awesome-readme](https://developer.hashicorp.com/terraform/install))
+- descargar terraform en la pagina oficial de terraform [Terraform.com](https://developer.hashicorp.com/terraform/install)
