@@ -1,6 +1,6 @@
 INFRAESTRUCTURA COMO CÓDIGO CON TERRAFORM + MULTI-AMBIENTE
 
-en este proyecto encontraras un proyecto en el cual se despliego infractuctura usando codigo en aws, ademas de ser multi Ambiente,, 
-aquie hacesmos una explicacion detalla de como desplegar el proyecto de forma
-personalizada, esto debido a que al ser modular el codigo pueda ser adptado para los interes de uan persona cualquiera
+En este proyecto encontraras un proyecto en el cual se despliega infractuctura usando codigo en aws, ademas de ser multi Ambiente, trae beneficios comom por ejemplo; menor porbabilidad de que colapse todo el sistema, y tiene una mejor automatizacion ya que puedo lanzar ambiente por ambiente. 
+
+aquie hacesmos una explicacion detalla de como desplegar el proyecto de forma personalizada, esto debido a que al ser modular el codigo pueda ser adptado para los interes de una persona cualquiera
 
