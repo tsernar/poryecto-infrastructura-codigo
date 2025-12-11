@@ -1,14 +1,19 @@
-name: Terraform Deploy
+name: Terraform Destroy
 
 on:
-  push:
-    branches:
-      - dev
-      - staging
-      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Ambiente a destruir (dev, staging o prod)"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
 
 jobs:
-  terraform:
+  terraform-destroy:
     runs-on: ubuntu-latest
 
     env:
@@ -25,34 +30,36 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          if [ "${GITHUB_REF_NAME}" == "dev" ]; then
+          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
             echo "WORKSPACE=dev" >> $GITHUB_ENV
             echo "TFVARS=env/dev.tfvars" >> $GITHUB_ENV
-          elif [ "${GITHUB_REF_NAME}" == "staging" ]; then
+          elif [ "${{ github.event.inputs.environment }}" == "staging" ]; then
             echo "WORKSPACE=staging" >> $GITHUB_ENV
             echo "TFVARS=env/staging.tfvars" >> $GITHUB_ENV
-          elif [ "${GITHUB_REF_NAME}" == "main" ]; then
+          elif [ "${{ github.event.inputs.environment }}" == "prod" ]; then
             echo "WORKSPACE=prod" >> $GITHUB_ENV
             echo "TFVARS=env/prod.tfvars" >> $GITHUB_ENV
+          else
+            echo "Ambiente inválido: ${{ github.event.inputs.environment }}"
+            exit 1
           fi
 
       - name: Terraform Init
         run: terraform init -reconfigure
 
-      - name: Select or Create Workspace
+      - name: Select Workspace (must exist)
         run: |
           terraform workspace list
           if terraform workspace list | grep -q "${WORKSPACE}"; then
-            echo "Selecting workspace ${WORKSPACE}"
+            echo "Seleccionando workspace ${WORKSPACE}"
             terraform workspace select "${WORKSPACE}"
           else
-            echo "Creating workspace ${WORKSPACE}"
-            terraform workspace new "${WORKSPACE}"
-            terraform workspace select "${WORKSPACE}"
+            echo "El workspace ${WORKSPACE} no existe. No se puede destruir."
+            exit 1
           fi
 
-      - name: Terraform Plan
-        run: terraform plan -var-file="${TFVARS}"
+      - name: Terraform Plan Destroy
+        run: terraform plan -destroy -var-file="${TFVARS}"
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="${TFVARS}"
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -var-file="${TFVARS}"
