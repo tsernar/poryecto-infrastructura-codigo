@@ -4,3 +4,6 @@ En este proyecto encontraras un proyecto en el cual se despliega infractuctura u
 
 aquie hacesmos una explicacion detalla de como desplegar el proyecto de forma personalizada, esto debido a que al ser modular el codigo pueda ser adptado para los interes de una persona cualquiera
 
+##Se necesita
+
+descargar terraform 
