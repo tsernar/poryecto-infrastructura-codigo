@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "terraform-thomas-prueba"
+    bucket         = "terraform-bucket-alcidez"
     key            = "project9/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-locks"
