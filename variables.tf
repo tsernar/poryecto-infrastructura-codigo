@@ -1,90 +1,129 @@
-variable "environment" {
-  description = "Ambiente (dev, staging, prod)"
+variable "aws_region" { 
+    type = string 
+    default = "us-east-1" 
+}
+variable "environment" { 
+    type = string 
+}
+
+#partes de Networking
+
+variable "vpc_cidr" { 
+    type = string 
+}
+
+variable "public_subnet_cidrs" { 
+    type = list(string) 
+}
+
+variable "private_subnet_cidrs" { 
+    type = list(string) 
+}
+
+#computo
+
+variable "app_name" { 
+    type = string 
+    default = "app" 
+}
+variable "instance_type" { 
+    type = string 
+    default = "t3.micro" 
+}
+variable "min_size" { 
+    type = number 
+    default = 2 
+}
+variable "max_size" { 
+    type = number 
+    default = 5
+}
+variable "desired_capacity_blue"  { 
+    type = number 
+    default = 2 
+}
+variable "desired_capacity_green" { 
+    type = number 
+    default = 0 
+}
+
+# Blue/Green traffic control
+# active_color: "blue" o "green"
+
+variable "active_color" {
   type        = string
+  default     = "blue"
+  validation {
+    condition     = contains(["blue", "green"], var.active_color)
+    error_message = "active_color debe ser 'blue' o 'green'."
+  }
 }
 
-variable "region" {
-  description = "Región de AWS"
-  type        = string
+# Envio por porcentaje porcentajes (en vez de switch total)
+variable "traffic_weight_blue"  { 
+    type = number 
+    default = 100 
+}
+variable "traffic_weight_green" { 
+    type = number 
+    default = 0 
 }
 
-variable "vpc_cidr" {
-  description = "CIDR de la VPC"
-  type        = string
+#almacenamiento
+
+variable "app_bucket_name" { 
+    type = string 
 }
 
-variable "public_subnet_cidrs" {
-  description = "CIDRs de subnets públicas"
-  type        = list(string)
-}
+#DB 
 
-variable "private_subnet_cidrs" {
-  description = "CIDRs de subnets privadas"
-  type        = list(string)
+variable "db_engine" { 
+    type = string 
+    default = "postgres" 
 }
-
-variable "instance_type" {
-  description = "Tipo de instancia para las EC2"
-  type        = string
+variable "db_engine_version" { 
+    type = string 
+    default = "15.4" 
 }
-
-variable "desired_capacity" {
-  description = "Capacidad deseada del Auto Scaling Group"
-  type        = number
-  default     = 2
+variable "db_instance_class" { 
+    type = string 
+    default = "db.t3.micro" 
 }
-
-variable "max_size" {
-  description = "Tamaño máximo del Auto Scaling Group"
-  type        = number
-  default     = 3
+variable "db_allocated_storage" { 
+    type = number 
+    default = 20 
 }
-
-variable "min_size" {
-  description = "Tamaño mínimo del Auto Scaling Group"
-  type        = number
-  default     = 1
+variable "db_name" { 
+    type = string 
+    default = "appdb" 
 }
-
-variable "db_instance_class" {
-  description = "Clase de instancia para RDS"
-  type        = string
+variable "db_username" { 
+    type = string 
+    default = "appuser" 
 }
+variable "db_password_ssm_parameter" { 
+    type = string 
+} 
 
-variable "db_engine" {
-  description = "Motor de base de datos (mysql, postgres, etc.)"
-  type        = string
-  default     = "mysql"
+#vpc
+
+variable "enable_vpc_peering" { 
+    type = bool 
+    default = false 
 }
-
-variable "db_engine_version" {
-  description = "Versión del motor"
-  type        = string
-  default     = "8.0"
+variable "peer_vpc_id" { 
+    type = string 
+    default = "" 
 }
-
-variable "db_allocated_storage" {
-  description = "Almacenamiento en GB"
-  type        = number
-  default     = 20
+variable "peer_vpc_cidr" { 
+    type = string 
+    default = "" 
 }
-
-variable "db_name" {
-  description = "Nombre de la base de datos"
-  type        = string
+variable "peer_region" { 
+    type = string 
+    default = "us-east-1" 
 }
-
-variable "db_username" {
-  description = "Usuario de la base de datos"
-  type        = string
-}
-
-variable "db_password_ssm_parameter" {
-  description = "Nombre del parámetro en SSM con el password de la DB"
-  type        = string
-}
-
-variable "app_bucket_name" {
-  description = "Nombre del bucket S3 para la app"
-  type        = string
+variable "auto_accept_peering" { 
+    type = bool 
+    default = true 
 }
