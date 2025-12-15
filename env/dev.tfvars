@@ -1,30 +1,19 @@
 environment = "dev"
-region      = "us-east-1"
 
-vpc_cidr = "10.0.0.0/16"
+vpc_cidr = "10.10.0.0/16"
+public_subnet_cidrs  = ["10.10.1.0/24", "10.10.2.0/24"]
+private_subnet_cidrs = ["10.10.11.0/24", "10.10.12.0/24"]
 
-public_subnet_cidrs = [
-  "10.0.1.0/24",
-  "10.0.2.0/24",
-]
+app_bucket_name = "tu-bucket-dev-unico-12345"
 
-private_subnet_cidrs = [
-  "10.0.11.0/24",
-  "10.0.12.0/24",
-]
+db_password_ssm_parameter = "/app/dev/db_password"
 
-instance_type    = "t3.micro"
-desired_capacity = 1
-min_size         = 1
-max_size         = 2
+# Blue/Green (dev: solo blue prendido)
+active_color = "blue"
+traffic_weight_blue  = 100
+traffic_weight_green = 0
+desired_capacity_blue  = 2
+desired_capacity_green = 0
 
-db_instance_class        = "db.t3.micro"
-db_engine                = "mysql"
-db_engine_version        = "8.0"
-db_allocated_storage     = 20
-db_name                  = "appdb"
-db_username              = "admin"
-db_password_ssm_parameter = "/dev/app/db/password"
-
-app_bucket_name = "mi-app-bucket-dev-1234"
-
+# Peering (apagado por defecto)
+enable_vpc_peering = false
