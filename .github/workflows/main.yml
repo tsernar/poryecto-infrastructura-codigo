@@ -7,29 +7,8 @@ on:
       - staging
       - main
 
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: "Modo de despliegue"
-        required: true
-        default: "one"
-        type: choice
-        options:
-          - one
-          - all
-      environment:
-        description: "Ambiente (solo si mode=one)"
-        required: false
-        type: choice
-        options:
-          - dev
-          - staging
-          - prod
-
 jobs:
-
-  terraform-one:
-    if: github.event_name == 'push' || github.event.inputs.mode == 'one'
+  terraform:
     runs-on: ubuntu-latest
 
     env:
@@ -46,67 +25,36 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
-            if [ "${GITHUB_REF_NAME}" = "dev" ]; then
-              echo "WORKSPACE=dev" >> $GITHUB_ENV
-              echo "TFVARS=env/dev.tfvars" >> $GITHUB_ENV
-            elif [ "${GITHUB_REF_NAME}" = "staging" ]; then
-              echo "WORKSPACE=staging" >> $GITHUB_ENV
-              echo "TFVARS=env/staging.tfvars" >> $GITHUB_ENV
-            else
-              echo "WORKSPACE=prod" >> $GITHUB_ENV
-              echo "TFVARS=env/prod.tfvars" >> $GITHUB_ENV
-            fi
-          else
-            echo "WORKSPACE=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-            echo "TFVARS=env/${{ github.event.inputs.environment }}.tfvars" >> $GITHUB_ENV
+          if [ "${GITHUB_REF_NAME}" == "dev" ]; then
+            echo "WORKSPACE=dev" >> $GITHUB_ENV
+            echo "TFVARS=env/dev.tfvars" >> $GITHUB_ENV
+          elif [ "${GITHUB_REF_NAME}" == "staging" ]; then
+            echo "WORKSPACE=staging" >> $GITHUB_ENV
+            echo "TFVARS=env/staging.tfvars" >> $GITHUB_ENV
+          elif [ "${GITHUB_REF_NAME}" == "main" ]; then
+            echo "WORKSPACE=prod" >> $GITHUB_ENV
+            echo "TFVARS=env/prod.tfvars" >> $GITHUB_ENV
           fi
 
-      - name: Terraform Init
+      - name: Terraform Init (reconfigure)
         run: terraform init -reconfigure
 
       - name: Select or Create Workspace
         run: |
-          terraform workspace select "$WORKSPACE" \
-          || terraform workspace new "$WORKSPACE"
+          echo "Current workspaces:"
+          terraform workspace list
+
+          if terraform workspace list | grep -q "${WORKSPACE}"; then
+            echo "Selecting workspace ${WORKSPACE}"
+            terraform workspace select "${WORKSPACE}"
+          else
+            echo "Creating and selecting workspace ${WORKSPACE}"
+            terraform workspace new "${WORKSPACE}"
+            terraform workspace select "${WORKSPACE}"
+          fi
 
       - name: Terraform Plan
-        run: terraform plan -var-file="$TFVARS"
+        run: terraform plan -var-file="${TFVARS}"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="$TFVARS"
-
-
-  terraform-all:
-    if: github.event.inputs.mode == 'all'
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        env: [dev, staging, prod]
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: us-east-1
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        run: terraform init -reconfigure
-
-      - name: Select or Create Workspace
-        run: |
-          terraform workspace select "${{ matrix.env }}" \
-          || terraform workspace new "${{ matrix.env }}"
-
-      - name: Terraform Plan
-        run: terraform plan -var-file="env/${{ matrix.env }}.tfvars"
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="env/${{ matrix.env }}.tfvars"
+        run: terraform apply -auto-approve -var-file="${TFVARS}"
