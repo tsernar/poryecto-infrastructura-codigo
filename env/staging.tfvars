@@ -1,29 +1,18 @@
 environment = "staging"
-region      = "us-east-1"
 
-vpc_cidr = "10.1.0.0/16"
+vpc_cidr = "10.20.0.0/16"
+public_subnet_cidrs  = ["10.20.1.0/24", "10.20.2.0/24"]
+private_subnet_cidrs = ["10.20.11.0/24", "10.20.12.0/24"]
 
-public_subnet_cidrs = [
-  "10.1.1.0/24",
-  "10.1.2.0/24",
-]
+app_bucket_name = "tu-bucket-staging-unico-12345"
 
-private_subnet_cidrs = [
-  "10.1.11.0/24",
-  "10.1.12.0/24",
-]
+db_password_ssm_parameter = "/app/staging/db_password"
 
-instance_type    = "t3.micro"
-desired_capacity = 2
-min_size         = 1
-max_size         = 3
+# Canary example
+active_color = "blue"
+traffic_weight_blue  = 90
+traffic_weight_green = 10
+desired_capacity_blue  = 2
+desired_capacity_green = 1
 
-db_instance_class        = "db.t3.micro"
-db_engine                = "mysql"
-db_engine_version        = "8.0"
-db_allocated_storage     = 40
-db_name                  = "appdb"
-db_username              = "admin"
-db_password_ssm_parameter = "/staging/app/db/password"
-
-app_bucket_name = "mi-app-bucket-staging-1234"
+enable_vpc_peering = false
