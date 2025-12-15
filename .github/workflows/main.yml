@@ -1,14 +1,12 @@
 name: Terraform Deploy
 
 on:
-  # 🔹 Despliegue automático por ambiente
   push:
     branches:
       - dev
       - staging
       - main
 
-  # 🔹 Despliegue manual (uno o todos)
   workflow_dispatch:
     inputs:
       mode:
